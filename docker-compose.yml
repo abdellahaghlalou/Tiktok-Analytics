@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  # The backend instance
+  # TODO update ps name to the initials of ur project
+  asg:
+    build: .
+    ports:
+      - 8080:8080
+    env_file: Tiktok_Analytics/.env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8080"
+    command:
+    
+      - "ASG"
+    networks:
+      - dev
+    depends_on:
+      - "db"
+
+
+  # Database instance
+  db:
+    image: postgres:13-alpine
+    hostname: db
+    env_file: Tiktok_Analytics/.env
+    networks:
+      - dev
+
+networks:
+  dev:

@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+loguru = "*"
+aiohttp = "*"
+uvicorn = "*"
+websockets = "*"
+colorama = "*"
+
+[dev-packages]
+pytest = "*"
+requests = "*"
+
+[requires]
+python_version = "3.9"

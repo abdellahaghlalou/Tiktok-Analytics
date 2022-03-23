@@ -1,0 +1,12 @@
+
+# Run the process in debug mode
+IS_DEBUG=True
+# The Key for using the api (not really used)
+API_KEY=A67D568AC94DB2CB0141D0C81B1E8A4CE45A7856FDFDAAA5F5CDBF141FF57EF1
+# Postgres Authentication
+POSTGRES_USER=USer
+POSTGRES_PASSWORD=2020_2021
+POSTGRES_PORT=5432
+#TODO  Update name with the name of the project
+POSTGRES_DB=PStartup
+POSTGRES_HOST=db
