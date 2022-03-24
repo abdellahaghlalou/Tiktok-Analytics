@@ -10,6 +10,7 @@ aiohttp = "*"
 uvicorn = "*"
 websockets = "*"
 colorama = "*"
+tortoise-orm = "*"
 
 [dev-packages]
 pytest = "*"

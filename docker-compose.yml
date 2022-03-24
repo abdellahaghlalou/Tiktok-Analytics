@@ -18,6 +18,7 @@ services:
       - dev
     depends_on:
       - "db"
+      - "mongodb"
 
 
   # Database instance
@@ -27,6 +28,23 @@ services:
     env_file: Tiktok_Analytics/.env
     networks:
       - dev
-
+  mongodb:
+    image: mongo:4.2.8
+    hostname: mongodb
+    env_file: Tiktok_Analytics/.env
+    networks:
+      - dev
+    volumes:
+      - ./Tiktok_Analytics/mongodb:/data/db
+    ports:
+      - 27017:27017
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    env_file:
+      - fileName: Tiktok_Analytics/.env
+    networks:
+      - dev
 networks:
   dev:
