@@ -42,8 +42,7 @@ services:
     image: mongo-express
     ports:
       - 8081:8081
-    env_file:
-      - fileName: Tiktok_Analytics/.env
+    env_file: Tiktok_Analytics/.env
     networks:
       - dev
 networks:
