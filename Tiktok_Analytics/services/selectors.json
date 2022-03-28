@@ -1,0 +1,13 @@
+{
+    "Account_button": "//div[@id='tabs-0-tab-search_account']",
+    "Videos_button": "//div[@id='tabs-0-tab-search_video']",
+    "see_more": "//button[@data-e2e='search-load-more']",
+    "user_container":"//div[@data-e2e='search-user-container']",
+    "video_container":"//div[@data-e2e='search_video-item-list']/div",
+    "user_img":"//div[@data-e2e='search-user-container']//img",
+    "username":"//p[@data-e2e='search-user-unique-id']",
+    "username_video":"//p[@data-e2e='search-card-user-unique-id']",
+    "nickname":"",
+    "user_description":"",
+    "followers":""
+}
