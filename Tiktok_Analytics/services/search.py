@@ -21,7 +21,6 @@ class Search:
     def search(self) -> None:
         if self.option == 1:
             self.search_result =  self.search_by_user(self.search_word)
-            #self.search_result = [User(username="aaa",img="dd",desc="ff")]
         if self.option == 2:
             self.search_result =  self.search_by_video(self.search_word)
         if self.option == 3:
