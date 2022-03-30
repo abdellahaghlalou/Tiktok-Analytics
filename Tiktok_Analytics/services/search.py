@@ -10,6 +10,7 @@ import random
 class Search:
     
     selectors = json.load(open("Tiktok_Analytics\services\selectors.json"))
+    cookies = json.load(open("Tiktok_Analytics\services\cookies.json"))
 
     def __init__(self,option : int,search_word : str,search_result: Optional[List[Union[Video,User]]]) -> None:
         self.option = option
@@ -35,6 +36,7 @@ class Search:
         browser = playwright.chromium.launch(headless=False)
         global context
         context = browser.new_context()
+        context.add_cookies(Search.cookies)
         global page
         page = context.new_page()
         page.goto("https://www.tiktok.com/")
@@ -57,7 +59,7 @@ class Search:
         page.wait_for_timeout((random.random() * 1000 + 1000))
         page.query_selector(Search.selectors["Account_button"]).click()
 
-        #load_more(10)
+        Search.load_more(10)
 
         page.wait_for_timeout((random.random() * 1000 + 1000))
         users_containers = page.query_selector_all(Search.selectors["user_container"])
@@ -66,7 +68,8 @@ class Search:
         #all_nicknames = list(map(get_nickname, users_containers))
         all_descs = list(map(Search.get_user_desc, users_containers))
         #all_followers = list(map(get_followers, users_containers))
-
+        #page.pause()
+        print(all_usernames)
         browser.close()
         playwright.stop()
         return [User(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i]) for i in range(len(all_usernames))]
@@ -79,7 +82,7 @@ class Search:
         page.wait_for_timeout((random.random() * 1000 + 1000))
         page.query_selector(Search.selectors["Videos_button"]).click()
         
-        Search.load_more(10)
+        Search.load_more(3)
 
         page.wait_for_timeout((random.random() * 1000 + 1000))
         videos_containers = page.query_selector_all(Search.selectors["video_container"])
@@ -88,10 +91,12 @@ class Search:
         all_descs = list(map(Search.get_video_desc, videos_containers))
         all_tags_hashtags = list(map(Search.get_tags_hashtags, videos_containers))
         all_VideoWatchCount = list(map(Search.get_VideoWatchCount, videos_containers))
+        all_VideoIds = list(map(Search.get_videoIds, videos_containers))
+        print(all_VideoIds)
 
         browser.close()
         playwright.stop()
-        return [Video(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i]) for i in range(len(all_usernames))]
+        return [Video(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
     
     def search_by_hashtag(self,search_word : str) -> List[Video]:
         pass
@@ -129,10 +134,18 @@ class Search:
         return elt.query_selector("div[data-e2e='search-card-like-container']").text_content()
 
     def get_tags_hashtags(elt):
-        list_a_tags = elt.query_selector("div[data-e2e='search-card-video-caption']").query_selector_all("a")
-        list_tags_hashtags = [a.text_content() for a in list_a_tags]
-        return list_tags_hashtags
+        try :
+            list_a_tags = elt.query_selector("div[data-e2e='search-card-video-caption']").query_selector_all("a")
+            list_tags_hashtags = [a.text_content() for a in list_a_tags]
+            return list_tags_hashtags
+        except :
+            return []
 
     def get_video_desc(elt):  
-        return elt.query_selector("div[data-e2e='search-card-video-caption']").query_selector("span").text_content()
-    
+        try :
+            return elt.query_selector("div[data-e2e='search-card-video-caption']").query_selector("span").text_content()
+        except :
+            return ""
+
+    def get_videoIds(elt):
+        return elt.query_selector("//div[@data-e2e='search_video-item']//a").get_attribute("href").split("/")[-1]

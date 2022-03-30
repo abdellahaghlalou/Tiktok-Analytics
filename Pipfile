@@ -12,6 +12,7 @@ websockets = "*"
 colorama = "*"
 tortoise-orm = "*"
 playwright = "*"
+motor = "*"
 
 [dev-packages]
 pytest = "*"

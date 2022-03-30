@@ -1,4 +1,4 @@
-FROM python:3.8-alpine as builder
+FROM python:3.9-alpine as builder
 
 ENV LANG C.UTF-8
 
@@ -36,7 +36,7 @@ RUN pip install --user .
 ####################
 # Production image #
 ####################
-FROM python:3.8-alpine AS prod
+FROM python:3.9-alpine AS prod
 # This is our runtime, again
 # It's better be refactored to a separate image to avoid instruction duplication
 RUN ln -sf /usr/bin/pip3 /usr/bin/pip

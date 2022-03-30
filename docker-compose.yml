@@ -23,7 +23,7 @@ services:
 
   # Database instance
   db:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     hostname: db
     env_file: Tiktok_Analytics/.env
     networks:

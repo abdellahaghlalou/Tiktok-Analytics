@@ -8,3 +8,4 @@ class Video(BaseModel):
     img : str
     tags_hashtags : List[str]
     videoCountWatch : str
+    videoId : str
