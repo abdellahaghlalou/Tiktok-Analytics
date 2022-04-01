@@ -2,8 +2,8 @@ import selectors
 from typing import List,Optional,Union
 import json
 from playwright.sync_api import Playwright, sync_playwright
-from ..models.user import User
-from ..models.video import Video
+from ..database.models.user import User
+from ..database.models.video import Video
 import random
 
 
@@ -35,7 +35,7 @@ class Search:
         browser = playwright.chromium.launch(headless=False)
         global context
         context = browser.new_context()
-        context.add_cookies(Search.cookies)
+        #context.add_cookies()
         global page
         page = context.new_page()
         page.goto("https://www.tiktok.com/")
@@ -59,7 +59,7 @@ class Search:
         page.query_selector(Search.selectors["Account_button"]).click()
 
         Search.load_more(10)
-
+        page.pause()
         page.wait_for_timeout((random.random() * 1000 + 1000))
         users_containers = page.query_selector_all(Search.selectors["user_container"])
         all_usernames = list(map(Search.get_user_name, users_containers))

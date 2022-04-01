@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, Request, status, Depends
 from typing import List, Optional, Union
-from ...models.user import User
-from ...models.video import Video
+from ...database.models.user import User
+from ...database.models.video import Video
 from ...services.search import Search
 from ...services.browser import Browser
 

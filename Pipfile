@@ -13,6 +13,7 @@ colorama = "*"
 tortoise-orm = "*"
 playwright = "*"
 motor = "*"
+tiktokapi = "*"
 
 [dev-packages]
 pytest = "*"
