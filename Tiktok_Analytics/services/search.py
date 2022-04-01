@@ -2,8 +2,8 @@ import selectors
 from typing import List,Optional,Union
 import json
 from playwright.sync_api import Playwright, sync_playwright
-from ..database.models.user import User
-from ..database.models.video import Video
+from ..database.models.user_target import UserTarget
+from ..database.models.video_target import VideoTarget
 import random
 
 
@@ -12,7 +12,7 @@ class Search:
     selectors = json.load(open("Tiktok_Analytics\services\selectors.json"))
     cookies = json.load(open("Tiktok_Analytics\services\cookies.json"))
 
-    def __init__(self,option : int,search_word : str,search_result: Optional[List[Union[Video,User]]]) -> None:
+    def __init__(self,option : int,search_word : str,search_result: Optional[List[Union[VideoTarget,UserTarget]]]) -> None:
         self.option = option
         self.search_word = search_word
         self.search_result = search_result
@@ -50,7 +50,7 @@ class Search:
             page.wait_for_timeout((random.random() * 1000 + 1000))
             page.query_selector(Search.selectors["see_more"]).click()
 
-    def search_by_user(self,search_word : str) -> List[User]:
+    def search_by_user(self,search_word : str) -> List[UserTarget]:
 
         Search.start_playwright()
         page.wait_for_timeout((random.random() * 2000 + 10000))
@@ -71,9 +71,9 @@ class Search:
         print(all_usernames)
         browser.close()
         playwright.stop()
-        return [User(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i]) for i in range(len(all_usernames))]
+        return [UserTarget(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i]) for i in range(len(all_usernames))]
 
-    def search_by_video(self,search_word : str) -> List[Video]:
+    def search_by_video(self,search_word : str) -> List[VideoTarget]:
         
         Search.start_playwright()
         page.wait_for_timeout((random.random() * 2000 + 10000))
@@ -95,12 +95,12 @@ class Search:
 
         browser.close()
         playwright.stop()
-        return [Video(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
+        return [VideoTarget(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
     
-    def search_by_hashtag(self,search_word : str) -> List[Video]:
+    def search_by_hashtag(self,search_word : str) -> List[VideoTarget]:
         pass
 
-    def search_by_sound(self,search_word : str) -> List[Video]:
+    def search_by_sound(self,search_word : str) -> List[VideoTarget]:
         pass
     
     def get_user_name(elt):
