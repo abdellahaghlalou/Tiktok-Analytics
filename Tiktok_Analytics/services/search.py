@@ -35,10 +35,12 @@ class Search:
         browser = playwright.chromium.launch(headless=False)
         global context
         context = browser.new_context()
-        #context.add_cookies()
+        context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
+        context.add_cookies(Search.cookies)
         global page
         page = context.new_page()
         page.goto("https://www.tiktok.com/")
+
 
     def search_bar(search_word : str):
         page.query_selector("input[type='search']").type(search_word)
@@ -53,12 +55,14 @@ class Search:
     def search_by_user(self,search_word : str) -> List[UserTarget]:
 
         Search.start_playwright()
-        page.wait_for_timeout((random.random() * 2000 + 10000))
+        page.pause()
+        page.wait_for_timeout((random.random() * 2000 + 3000))
+        
         Search.search_bar(search_word)        
         page.wait_for_timeout((random.random() * 1000 + 1000))
         page.query_selector(Search.selectors["Account_button"]).click()
 
-        Search.load_more(10)
+        #Search.load_more(10)
         page.pause()
         page.wait_for_timeout((random.random() * 1000 + 1000))
         users_containers = page.query_selector_all(Search.selectors["user_container"])
@@ -71,7 +75,7 @@ class Search:
         print(all_usernames)
         browser.close()
         playwright.stop()
-        return [UserTarget(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i]) for i in range(len(all_usernames))]
+        return [UserTarget(username=all_usernames[i],img=all_imgs[i],signature=all_descs[i]) for i in range(len(all_usernames))]
 
     def search_by_video(self,search_word : str) -> List[VideoTarget]:
         
