@@ -14,5 +14,4 @@ class VideoTarget(BaseModel):
     comments :  Optional[List[dict]] = None
     videoId : str
     soundId : str
-    shareTime : Optional[str] = None
 

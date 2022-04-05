@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends,Query
+from fastapi import APIRouter, Depends,Query,Request
 from typing import List, Optional, Union
-
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from ...database.models.user_target import UserTarget
 from ...database.models.video_target import VideoTarget
@@ -14,13 +14,13 @@ class Item(BaseModel):
     targets : List[dict]
 
 @router.post("/api/scrape",response_model=List[Union[VideoTarget,UserTarget]])
-async def scrape_(item:Item) :  
+async def scrape_(request : Request,item:Item) :  
     scrape = Scrape("111")
-    result = await scrape.scrape(option=item.option,targets=item.targets)
+    results = await scrape.scrape(option=item.option,targets=item.targets)
+    
+    if item.option == 1:
+        await add_new_users(request,results)
+    if item.option == 2:
+        await add_new_videos(request,results)
 
-    if item.option == "1":
-        tt = await add_new_users(result)
-    if item.option == "2":
-        tt = await add_new_videos(result)
-
-    return result
+    return results

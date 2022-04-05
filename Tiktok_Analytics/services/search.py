@@ -55,7 +55,6 @@ class Search:
     def search_by_user(self,search_word : str) -> List[UserTarget]:
 
         Search.start_playwright()
-        page.pause()
         page.wait_for_timeout((random.random() * 2000 + 3000))
         
         Search.search_bar(search_word)        
@@ -63,13 +62,12 @@ class Search:
         page.query_selector(Search.selectors["Account_button"]).click()
 
         #Search.load_more(10)
-        page.pause()
         page.wait_for_timeout((random.random() * 1000 + 1000))
         users_containers = page.query_selector_all(Search.selectors["user_container"])
         all_usernames = list(map(Search.get_user_name, users_containers))
         all_imgs = list(map(Search.get_img, users_containers))
-        #all_nicknames = list(map(get_nickname, users_containers))
         all_descs = list(map(Search.get_user_desc, users_containers))
+        #all_nicknames = list(map(get_nickname, users_containers))
         #all_followers = list(map(get_followers, users_containers))
         #page.pause()
         print(all_usernames)

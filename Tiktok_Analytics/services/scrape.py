@@ -42,11 +42,13 @@ class Scrape :
         for user in users:
             users_list.append(self.scrape_user(user["username"]))
         return users_list
+
     async def scrape_videos(self,videos:List[dict]) -> List[VideoTarget]:
         videos_list = []
         for video in videos:
             videos_list.append(await self.scrape_video(video))
         return videos_list
+        
     def scrape_user(self,username:str) -> UserTarget:
         user = Scrape.api.user(username)
         user_info = user.info_full()
@@ -63,6 +65,7 @@ class Scrape :
                                 diggCount=user_info["stats"]["diggCount"],
                                 )
         return user_data
+
     async def scrape_video(self,video : dict) -> VideoTarget:
         await Scrape.start_playwright()
         await page.wait_for_timeout((random.random() * 2000 + 3000))

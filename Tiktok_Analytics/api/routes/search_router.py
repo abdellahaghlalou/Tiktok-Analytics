@@ -3,7 +3,6 @@ from typing import List, Optional, Union
 from ...database.models.user_target import UserTarget
 from ...database.models.video_target import VideoTarget
 from ...services.search import Search
-from ...services.browser import Browser
 
 router = APIRouter()
 

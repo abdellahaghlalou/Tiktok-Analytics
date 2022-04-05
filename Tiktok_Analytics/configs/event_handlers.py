@@ -8,17 +8,21 @@ Copyright (c) 2021 Henceforth
 from typing import Coroutine
 from fastapi import FastAPI
 from Tiktok_Analytics.services.utils import logger
+from motor.motor_asyncio import AsyncIOMotorClient
 
 
 async def _startup_model(app: FastAPI) -> Coroutine:
     """code to execute when the server startup
     """
+    app.mongodb_client = AsyncIOMotorClient("mongodb://localhost:27017")
+    app.mongodb = app.mongodb_client["tiktok"]
     logger.info("Server Startup")
 
 
 async def _shutdown_model(app: FastAPI) -> Coroutine:
     """code to execute when the server shutdown
     """
+    app.mongodb_client.close()
     logger.info("Server Shutdown")
 
 
