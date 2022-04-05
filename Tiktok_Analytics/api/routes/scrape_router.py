@@ -1,17 +1,26 @@
-from fastapi import APIRouter, Response, Request, status, Depends,Query
+from fastapi import APIRouter, Depends,Query
 from typing import List, Optional, Union
+
+from pydantic import BaseModel
 from ...database.models.user_target import UserTarget
 from ...database.models.video_target import VideoTarget
-from ...services.search import Search
 from ...services.scrape import Scrape
-from ...services.browser import Browser
-from ...database.database import add_new_target
+from ...database.database import add_new_users, add_new_videos
 
 router = APIRouter()
 
-@router.get("/api/scrape",response_model=List[Union[VideoTarget,UserTarget]])
-async def scrape_(option :str , q: Optional[list[str]] = Query(None)) :  
+class Item(BaseModel):
+    option : int
+    targets : List[dict]
+
+@router.post("/api/scrape",response_model=List[Union[VideoTarget,UserTarget]])
+async def scrape_(item:Item) :  
     scrape = Scrape("111")
-    result = scrape.scrape(option=1,videos=[],users=q)
-    tt = await add_new_target(result)
+    result = await scrape.scrape(option=item.option,targets=item.targets)
+
+    if item.option == "1":
+        tt = await add_new_users(result)
+    if item.option == "2":
+        tt = await add_new_videos(result)
+
     return result

@@ -5,6 +5,7 @@ Author:
 
 Copyright (c) 2021 Henceforth
 '''
+from xml.dom.minidom import Document
 from fastapi import FastAPI
 from tortoise import Tortoise
 from Tiktok_Analytics.database.models.user_target import UserTarget
@@ -15,7 +16,7 @@ import motor.motor_asyncio
 
 
 
-async def add_new_target(results):
+async def add_new_users(results):
     
     MONGO_DETAILS = "mongodb://localhost:27017"
 
@@ -23,7 +24,7 @@ async def add_new_target(results):
 
     database = client.tiktok
 
-    student_collection = database.get_collection("user_target")
+    users_collection = database.get_collection("user_target")
 
     
     for result in results:
@@ -41,6 +42,27 @@ async def add_new_target(results):
             "diggCount": result.diggCount,
             "img": result.img,
         }
-        result = await student_collection.insert_one(document)
+        result = await users_collection.insert_one(document)
        
 
+async def add_new_videos(results):
+
+    MONGO_DETAILS = "mongodb://localhost:27017"
+
+    client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+
+    database = client.tiktok
+
+    videos_collection = database.get_collection("video_target")
+
+    for result in results :
+
+        document = {
+            "username": result.username,
+            "videoId": result.videoId,
+            "soundId": result.soundId,
+            "commentCount": result.commentCount,
+            "likeCount": result.likeCount,
+            "comments": result.comments,
+        }
+        result = await videos_collection.insert_one(document)
