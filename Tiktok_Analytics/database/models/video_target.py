@@ -8,10 +8,10 @@ class VideoTarget(BaseModel):
     desc : Optional[str] = None
     img : Optional[str] = None
     tags_hashtags : Optional[List[str]] = None
-    videoCountWatch : Optional[int] = None
-    commentCount : int
-    likeCount : int
+    videoCountWatch : Optional[str] = None
+    commentCount : Optional[int] = None
+    likeCount : Optional[int] = None
     comments :  Optional[List[dict]] = None
     videoId : str
-    soundId : str
+    soundId : Optional[str] = None
 

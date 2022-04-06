@@ -9,8 +9,8 @@ import random
 
 class Search:
     
-    selectors = json.load(open("Tiktok_Analytics\services\selectors.json"))
-    cookies = json.load(open("Tiktok_Analytics\services\cookies.json"))
+    selectors = json.load(open("Tiktok_Analytics\static\selectors.json"))
+    cookies = json.load(open("Tiktok_Analytics\static\cookies.json"))
 
     def __init__(self,option : int,search_word : str,search_result: Optional[List[Union[VideoTarget,UserTarget]]]) -> None:
         self.option = option
@@ -93,7 +93,6 @@ class Search:
         all_tags_hashtags = list(map(Search.get_tags_hashtags, videos_containers))
         all_VideoWatchCount = list(map(Search.get_VideoWatchCount, videos_containers))
         all_VideoIds = list(map(Search.get_videoIds, videos_containers))
-        print(all_VideoIds)
 
         browser.close()
         playwright.stop()
