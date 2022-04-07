@@ -96,7 +96,7 @@ class Search:
 
         browser.close()
         playwright.stop()
-        return [VideoTarget(username=all_usernames[i],img=all_imgs[i],desc=all_descs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
+        return [VideoTarget(username=all_usernames[i],imgLink=all_imgs[i],desc=all_descs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
     
     def search_by_hashtag(self,search_word : str) -> List[VideoTarget]:
         pass
@@ -149,3 +149,6 @@ class Search:
 
     def get_videoIds(elt):
         return elt.query_selector("//div[@data-e2e='search_video-item']//a").get_attribute("href").split("/")[-1]
+
+    def trasform_nbr(nbr:str) -> int:
+        return int(nbr.replace("K","000").replace("M","000000").replace("B","000000000").replace(".",""))

@@ -1,3 +1,4 @@
+import selectors
 from typing import Optional,Union
 from ..database.models.user_target import UserTarget
 from ..database.models.video_target import VideoTarget
@@ -12,8 +13,8 @@ import json
 
 class Scrape : 
 
-    selectors = json.load(open("Tiktok_Analytics\services\selectors.json"))
-    cookies = json.load(open("Tiktok_Analytics\services\cookies.json"))
+    selectors = json.load(open("Tiktok_Analytics\static\selectors.json"))
+    cookies = json.load(open("Tiktok_Analytics\static\cookies.json"))
     api = TikTokApi()
     def __init__(self,scrape_operation : Optional[ScrapeOperation]) -> None:
         pass
@@ -25,7 +26,7 @@ class Scrape :
         browser =  await playwright.chromium.launch(headless=False)
         global context
         context = await browser.new_context()
-        #context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
+        #context.add_init_script("Tiktok_Analytics/static/js/navigator.plugins.js")
         await context.add_cookies(Scrape.cookies)
         global page
         page = await context.new_page()
@@ -78,18 +79,26 @@ class Scrape :
         await buttons[1].click()
         await page.wait_for_timeout((random.random() * 1000 + 1000))
 
-        sound = await page.query_selector("h4[data-e2e='browse-music'] > a")
+        sound = await page.query_selector(Scrape.selectors["sound"])
         sound= await sound.get_attribute("href")
-        commentCount = await page.query_selector("strong[data-e2e='browse-comment-count']")
+        commentCount = await page.query_selector(Scrape.selectors["commentCount"])
         commentCount = await commentCount.text_content()
         commentCount = Scrape.trasform_nbr(commentCount)
-        likeCounts = await page.query_selector("strong[data-e2e='browse-like-count']")
+        likeCounts = await page.query_selector(Scrape.selectors["likeCount"])
         likeCounts = await likeCounts.text_content()
         likeCounts = Scrape.trasform_nbr(likeCounts)
+        video_link = await page.query_selector(Scrape.selectors["videoLink"])
+        video_link = await video_link.get_attribute("src")
+        img_link = await page.query_selector(Scrape.selectors["videoImgLink"])
+        img_link = await img_link.get_attribute("src")
+        video_desc = await page.query_selector(Scrape.selectors["video_desc"])
+        video_description = await Scrape.get_video_desc(video_desc)
+        video_hashtags = await Scrape.get_video_hashtags(video_desc)
+        video_tags = await Scrape.get_video_tags(video_desc)
 
         # int(commentCount)//20
-        for i in range(3):
-            elt = await page.query_selector("div.tiktok-46wese-DivCommentListContainer.ey83cgi0")
+        for i in range(10):
+            elt = await page.query_selector(Scrape.selectors["comment_section"])
             await elt.evaluate("elt => elt.scroll(0,elt.scrollHeight)")
             await page.wait_for_timeout((random.random() * 100 + 100))
         comments = await page.query_selector_all("div.tiktok-16r0vzi-DivCommentItemContainer.e1c8wije0")
@@ -105,13 +114,35 @@ class Scrape :
         await browser.close()
         video_data = VideoTarget(username=video["username"],
                                 videoId=video["id"],
+                                videoLink=video_link,
+                                imgLink=img_link,
                                 soundId=sound,
                                 commentCount=commentCount,
                                 likeCount=likeCounts,
                                 comments=comments,
+                                desc = video_description,
+                                tags = video_tags,
+                                hashtags = video_hashtags,
                                 )
         return video_data
     
     def trasform_nbr(nbr:str) -> int:
 
         return int(nbr.replace("K","000").replace("M","000000").replace("B","000000000").replace(".",""))
+    
+    async def get_video_desc(video_desc:str) -> str:
+        all_text = await video_desc.query_selector_all("span")
+        all_text = [await elt.text_content() for elt in all_text]
+        return " ".join(all_text)
+    
+    async def get_video_hashtags(video_desc:str) -> List[str]:
+        all_hashtags = await video_desc.query_selector_all("a")
+        hashtags = [await hashtag.text_content() for hashtag in all_hashtags]
+        hashtags = [hashtag for hashtag in hashtags if hashtag.startswith("#")]
+        return hashtags
+    
+    async def get_video_tags(video_desc:str) -> List[str]:
+        all_tags = await video_desc.query_selector_all("a")
+        tags = [await tag.text_content() for tag in all_tags]
+        tags = [tag for tag in tags if tag.startswith("@")]
+        return tags

@@ -7,6 +7,13 @@
     "user_img":"//div[@data-e2e='search-user-container']//img",
     "username":"//p[@data-e2e='search-user-unique-id']",
     "username_video":"//p[@data-e2e='search-card-user-unique-id']",
+    "video_desc":"//div[@data-e2e='browse-video-desc']",
+    "videoLink":"//div[@data-e2e='browse-video']/video",
+    "videoImgLink":"div.tiktok-1jxhpnd-DivContainer.e1yey0rl0 > img",
+    "comment_section":"div.tiktok-46wese-DivCommentListContainer.ey83cgi0",
+    "commentCount":"//strong[@data-e2e='browse-comment-count']",
+    "likeCount":"//strong[@data-e2e='browse-like-count']",
+    "sound":"//h4[@data-e2e='browse-music']/a",
     "nickname":"",
     "user_description":"",
     "followers":""

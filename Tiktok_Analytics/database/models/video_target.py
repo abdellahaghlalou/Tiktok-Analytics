@@ -6,7 +6,10 @@ from typing import List,Type,Optional
 class VideoTarget(BaseModel):
     username : str
     desc : Optional[str] = None
-    img : Optional[str] = None
+    imgLink : Optional[str] = None
+    videoLink : Optional[str] = None
+    tags :  Optional[List[str]] = None
+    hashtags : Optional[List[str]] = None
     tags_hashtags : Optional[List[str]] = None
     videoCountWatch : Optional[str] = None
     commentCount : Optional[int] = None
