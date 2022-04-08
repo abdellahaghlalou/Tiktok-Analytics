@@ -6,6 +6,7 @@ from ..database.models.scrapeoperation import ScrapeOperation
 from playwright.async_api import Playwright, async_playwright
 from TikTokApi import TikTokApi
 from typing import List
+import urllib.request
 import random
 import time
 import json
@@ -17,7 +18,7 @@ class Scrape :
     cookies = json.load(open("Tiktok_Analytics\static\cookies.json"))
     api = TikTokApi()
     def __init__(self,scrape_operation : Optional[ScrapeOperation]) -> None:
-        pass
+        self.scrape_operation = scrape_operation
 
     async def start_playwright():
         global playwright
@@ -75,7 +76,8 @@ class Scrape :
         await page.goto(video_url)
         await page.wait_for_timeout((random.random() * 1000 + 3000))
 
-        buttons = await page.query_selector_all("button.tiktok-1xiuanb-ButtonActionItem.e1bs7gq20")
+        buttons = await page.query_selector_all("button.tiktok-1xiuanb-ButtonActionItem.ee8s79f0")
+        
         await buttons[1].click()
         await page.wait_for_timeout((random.random() * 1000 + 1000))
 
@@ -95,13 +97,26 @@ class Scrape :
         video_description = await Scrape.get_video_desc(video_desc)
         video_hashtags = await Scrape.get_video_hashtags(video_desc)
         video_tags = await Scrape.get_video_tags(video_desc)
+        #video_bytes = await Scrape.api.video(video["id"]).bytes()
+         
+        video_filename = "Tiktok_Analytics\static\\videos\\"+self.scrape_operation.user_id+"\\"+video["id"] + ".mp4"
+        image_filename  = "Tiktok_Analytics\static\\images\\"+self.scrape_operation.user_id+"\\"+video["id"] + ".jpg"
+        try :
+            urllib.request.urlretrieve(video_link, video_filename)
+        except :
+            print("you are trying to download existing video")
+        try :
+            urllib.request.urlretrieve(img_link, image_filename)
+        except :
+            print("you are trying to download existing image")
 
         # int(commentCount)//20
         for i in range(10):
             elt = await page.query_selector(Scrape.selectors["comment_section"])
             await elt.evaluate("elt => elt.scroll(0,elt.scrollHeight)")
             await page.wait_for_timeout((random.random() * 100 + 100))
-        comments = await page.query_selector_all("div.tiktok-16r0vzi-DivCommentItemContainer.e1c8wije0")
+        await page.wait_for_timeout((random.random() * 1000 + 1000))
+        comments = await page.query_selector_all(Scrape.selectors["single_comment"])
 
         comments = [{"whocomments" :await co.query_selector("a"),
                     "text":await co.query_selector("p[data-e2e='comment-level-1']") } 
@@ -110,7 +125,11 @@ class Scrape :
         comments = [{"username":await co["whocomments"].get_attribute("href"),
                     "text":await co["text"].text_content()} 
                     for co in comments]
-        #print(sound,commentCount,likeCounts,comments,len(comments))
+
+        comments = [{"username":co["username"].split("/")[-1],
+                    "text":co["text"]}  
+                    for co in comments]
+                    
         await browser.close()
         video_data = VideoTarget(username=video["username"],
                                 videoId=video["id"],

@@ -1,7 +1,7 @@
 '''
-Filename: user.py
+Filename: user_target.py
 Created Date: 
-Author: 
+Author: ABDELLAH AGHLALOU  
 
 Copyright (c) 2021 Henceforth
 '''
@@ -10,8 +10,10 @@ from pydantic import BaseModel
 from typing import Optional
 
 class UserTarget(BaseModel):
+    scrap_operation_id : Optional[str]
     username: str
     nickname: Optional[str] = None
+    nickname_followers: Optional[str] = None
     signature : Optional[str] = None
     privateAccount : Optional[bool] = None
     isUnderAge18 : Optional[bool]  = None       

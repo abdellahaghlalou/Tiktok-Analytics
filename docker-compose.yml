@@ -16,6 +16,9 @@ services:
       - "ASG"
     networks:
       - dev
+    volumes:
+      - Tiktok_Analytics/static/images:/app/images
+      - Tiktok_Analytics/static/videos:/app/videos
     depends_on:
       - "db"
       - "mongodb"

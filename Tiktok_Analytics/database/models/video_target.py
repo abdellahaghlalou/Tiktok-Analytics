@@ -4,6 +4,7 @@ from typing import List,Type,Optional
 
 
 class VideoTarget(BaseModel):
+    scrape_operation_id : Optional[str] = None
     username : str
     desc : Optional[str] = None
     imgLink : Optional[str] = None

@@ -15,6 +15,7 @@ playwright = "*"
 motor = "*"
 tiktokapi = "*"
 pytest-asyncio = "*"
+fastapi-users = {extras = ["tortoise-orm"], version = "*"}
 
 [dev-packages]
 pytest = "*"

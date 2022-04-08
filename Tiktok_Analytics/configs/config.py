@@ -31,10 +31,10 @@ TESTING: bool = config("TESTING", cast=to_bool, default=True)
 #**************** Celery ****************#
 #**************** Postgres ****************#
 # Database URl
-POSTGRES_USER = config("POSTGRES_USER", cast=str, default='admin')
-POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=str, default='admin')
-POSTGRES_PORT = config("POSTGRES_PORT", cast=int, default=5432)
-POSTGRES_DB = config('POSTGRES_DB', cast=str, default="admin")
-POSTGRES_HOST = config("POSTGRES_HOST", cast=str, default="db")
+POSTGRES_USER = config("POSTGRES_USER", cast=str, default='postgres')
+POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=str, default='123')
+POSTGRES_PORT = config("POSTGRES_PORT", cast=int, default=5050)
+POSTGRES_DB = config('POSTGRES_DB', cast=str, default="db_book")
+POSTGRES_HOST = config("POSTGRES_HOST", cast=str, default="localhost")
 
 DATABASE_URL: str = f"postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"

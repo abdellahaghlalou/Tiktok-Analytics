@@ -61,19 +61,17 @@ class Search:
         page.wait_for_timeout((random.random() * 1000 + 1000))
         page.query_selector(Search.selectors["Account_button"]).click()
 
-        #Search.load_more(10)
+        Search.load_more(5)
         page.wait_for_timeout((random.random() * 1000 + 1000))
         users_containers = page.query_selector_all(Search.selectors["user_container"])
         all_usernames = list(map(Search.get_user_name, users_containers))
         all_imgs = list(map(Search.get_img, users_containers))
         all_descs = list(map(Search.get_user_desc, users_containers))
-        #all_nicknames = list(map(get_nickname, users_containers))
-        #all_followers = list(map(get_followers, users_containers))
+        all_nicknames_followers = list(map(Search.get_nicknames_followers, users_containers))
         #page.pause()
-        print(all_usernames)
         browser.close()
         playwright.stop()
-        return [UserTarget(username=all_usernames[i],img=all_imgs[i],signature=all_descs[i]) for i in range(len(all_usernames))]
+        return [UserTarget(username=all_usernames[i],nickname_followers=all_nicknames_followers[i],img=all_imgs[i],signature=all_descs[i]) for i in range(len(all_usernames))]
 
     def search_by_video(self,search_word : str) -> List[VideoTarget]:
         
@@ -118,18 +116,15 @@ class Search:
             img = ""
         return img 
 
-    def get_nickname(elt):
-        return elt.query_selector("h2.tiktok-1n69p9f-H2SubTitle.e12ixqxa6").text_content()
+    def get_nicknames_followers(elt):
+       return  elt.query_selector_all("a")[1].text_content()
 
     def get_user_desc(elt):  
         try :
-            return elt.query_selector("p.tiktok-1jq7d8a-PDesc.e12ixqxa7").text_content()
+            return elt.query_selector("//a[2]/p[2]").text_content()
         except:
             return ""
 
-    def get_followers(elt):
-        return elt.query_selector("div.tiktok-1av3vif-DivSubTitleWrapper.e12ixqxa5").query_selector("span").text_content()
-    
     def get_VideoWatchCount(elt):
         return elt.query_selector("div[data-e2e='search-card-like-container']").text_content()
 
@@ -143,7 +138,7 @@ class Search:
 
     def get_video_desc(elt):  
         try :
-            return elt.query_selector("div[data-e2e='search-card-video-caption']").query_selector("span").text_content()
+            return elt.query_selector("//div[@data-e2e='search-card-video-caption']").query_selector("span").text_content()
         except :
             return ""
 

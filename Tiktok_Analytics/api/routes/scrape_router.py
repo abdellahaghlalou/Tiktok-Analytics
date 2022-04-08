@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends,Query,Request
 from typing import List, Optional, Union
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
+import time
+from Tiktok_Analytics.database.models.scrapeoperation import ScrapeOperation
 from ...database.models.user_target import UserTarget
 from ...database.models.video_target import VideoTarget
 from ...services.scrape import Scrape
@@ -15,7 +17,9 @@ class Item(BaseModel):
 
 @router.post("/api/scrape",response_model=List[Union[VideoTarget,UserTarget]])
 async def scrape_(request : Request,item:Item) :  
-    scrape = Scrape("111")
+
+    scrape_operation = ScrapeOperation(id ="" ,user_id="123",time=time.time())
+    scrape = Scrape(scrape_operation=scrape_operation)
     results = await scrape.scrape(option=item.option,targets=item.targets)
     
     if item.option == 1:
