@@ -34,4 +34,4 @@ def main():
     """
     # Creating Modified FastAPI instance
     app: FastAPI = get_app()
-    uvicorn.run(app,port=4211, log_level="info")
+    uvicorn.run(app,port=5000, log_level="info")

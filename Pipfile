@@ -13,9 +13,10 @@ colorama = "*"
 tortoise-orm = "*"
 playwright = "*"
 motor = "*"
-tiktokapi = "*"
 pytest-asyncio = "*"
 fastapi-users = {extras = ["tortoise-orm"], version = "*"}
+asyncpg = "*"
+tiktokapi = "*"
 
 [dev-packages]
 pytest = "*"
