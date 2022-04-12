@@ -10,7 +10,7 @@ from fastapi_users.authentication import (
 from fastapi_users.db import TortoiseUserDatabase
 
 from ..database.database import get_user_db
-from ..models.user import User, UserCreate, UserDB, UserUpdate
+from ..database.models.user import User, UserCreate, UserDB, UserUpdate
 
 SECRET = "SECRET"
 

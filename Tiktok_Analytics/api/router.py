@@ -7,7 +7,7 @@ Copyright (c) 2020 Henceforth
 '''
 from tortoise.contrib.fastapi import register_tortoise
 from ..configs.config import DATABASE_URL
-from ..models.user import UserDB
+from ..database.models.user import UserDB
 from .users import auth_backend, current_active_user, fastapi_users
 from fastapi import APIRouter,Depends
 from .routes import configuration, authentication, search_router, scrape_router
@@ -42,7 +42,7 @@ async def authenticated_route(user: UserDB = Depends(current_active_user)):
 register_tortoise(
     api_router,
     db_url=DATABASE_URL,
-    modules={"models": ["Tiktok_Analytics.models.user","Tiktok_Analytics\database\models\scrapeoperation"]},
+    modules={"models": ["Tiktok_Analytics.database.models.user","Tiktok_Analytics.database.models.scrapeoperation"]},
     generate_schemas=True,
 )
 

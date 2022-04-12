@@ -1,7 +1,7 @@
 import selectors
 from typing import Optional,Union
-from ..database.models.user_target import UserTarget
-from ..database.models.video_target import VideoTarget
+from ..models.user_target import UserTarget
+from ..models.video_target import VideoTarget
 from ..database.models.scrapeoperation import ScrapeOperation
 from playwright.async_api import Playwright, async_playwright
 from TikTokApi import TikTokApi
