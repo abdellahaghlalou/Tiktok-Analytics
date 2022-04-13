@@ -42,7 +42,10 @@ async def authenticated_route(user: UserDB = Depends(current_active_user)):
 register_tortoise(
     api_router,
     db_url=DATABASE_URL,
-    modules={"models": ["Tiktok_Analytics.database.models.user","Tiktok_Analytics.database.models.scrapeoperation"]},
+    modules={"models": ["Tiktok_Analytics.database.models.user",
+                        "Tiktok_Analytics.database.models.scrapeoperation",
+                        "Tiktok_Analytics.database.models.user_target",
+                        "Tiktok_Analytics.database.models.video_target"]},
     generate_schemas=True,
 )
 

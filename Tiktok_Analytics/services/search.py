@@ -2,8 +2,8 @@ import selectors
 from typing import List,Optional,Union
 import json
 from playwright.sync_api import Playwright, sync_playwright
-from ..database.models.user_target import UserTarget
-from ..database.models.video_target import VideoTarget
+from ..models.user_target import UserTarget
+from ..models.video_target import VideoTarget
 import random
 
 

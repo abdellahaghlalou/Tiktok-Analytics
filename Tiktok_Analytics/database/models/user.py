@@ -20,6 +20,19 @@ class UserModel(TortoiseBaseUserModel):
 
 
 class UserDB(User, models.BaseUserDB, PydanticModel):
+    """User representation in DB
+    """
+    _saved_in_db = True
+
+    async def from_tortoise_orm(user: any):
+        """ this just to fix the from_tortoise_orm not found
+        Args:
+            user (any): [description]
+        Returns:
+            [type]: [description]
+        """
+
+        return user
     class Config:
         orm_mode = True
         orig_model = UserModel

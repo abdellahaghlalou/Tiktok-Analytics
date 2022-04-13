@@ -2,6 +2,8 @@ import selectors
 from typing import Optional,Union
 from ..models.user_target import UserTarget
 from ..models.video_target import VideoTarget
+from ..database.models.user_target import UserTargetModel
+from ..database.models.video_target import VideoTargetModel
 from ..database.models.scrapeoperation import ScrapeOperation
 from playwright.async_api import Playwright, async_playwright
 from TikTokApi import TikTokApi
@@ -35,14 +37,14 @@ class Scrape :
 
     async def scrape(self,option:str,targets : List[dict]) -> List[any]:
         if option == 1:
-            return self.scrape_users(targets)
+            return await self.scrape_users(targets)
         if option == 2:
             return await self.scrape_videos(targets)
 
-    def scrape_users(self,users:List[dict]) -> List[UserTarget]:
+    async def scrape_users(self,users:List[dict]) -> List[UserTarget]:
         users_list = []
         for user in users:
-            users_list.append(self.scrape_user(user["username"]))
+            users_list.append(await self.scrape_user(user["username"]))
         return users_list
 
     async def scrape_videos(self,videos:List[dict]) -> List[VideoTarget]:
@@ -51,7 +53,7 @@ class Scrape :
             videos_list.append(await self.scrape_video(video))
         return videos_list
         
-    def scrape_user(self,username:str) -> UserTarget:
+    async def scrape_user(self,username:str) -> UserTarget:
         user = Scrape.api.user(username)
         user_info = user.info_full()
         user_data = UserTarget(username=user_info["user"]["uniqueId"],
@@ -66,6 +68,8 @@ class Scrape :
                                 heartCount=user_info["stats"]["heartCount"],
                                 diggCount=user_info["stats"]["diggCount"],
                                 )
+        user_target_rel = UserTargetModel(username=user_data.username,scrap_operation_id=self.scrape_operation.id)
+        await user_target_rel.save()
         return user_data
 
     async def scrape_video(self,video : dict) -> VideoTarget:
@@ -99,8 +103,8 @@ class Scrape :
         video_tags = await Scrape.get_video_tags(video_desc)
         #video_bytes = await Scrape.api.video(video["id"]).bytes()
          
-        video_filename = "Tiktok_Analytics\static\\videos\\"+self.scrape_operation.user_id+"\\"+video["id"] + ".mp4"
-        image_filename  = "Tiktok_Analytics\static\\images\\"+self.scrape_operation.user_id+"\\"+video["id"] + ".jpg"
+        video_filename = "Tiktok_Analytics\static\\videos\\"+"123"+"\\"+video["id"] + ".mp4"
+        image_filename  = "Tiktok_Analytics\static\\images\\"+"123"+"\\"+video["id"] + ".jpg"
         try :
             urllib.request.urlretrieve(video_link, video_filename)
         except :
@@ -143,6 +147,8 @@ class Scrape :
                                 tags = video_tags,
                                 hashtags = video_hashtags,
                                 )
+        video_target_rel = VideoTargetModel(video_id=video_data.videoId,scrap_operation_id=self.scrape_operation.id)
+        await video_target_rel.save()
         return video_data
     
     def trasform_nbr(nbr:str) -> int:

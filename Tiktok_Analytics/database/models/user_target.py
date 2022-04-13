@@ -11,7 +11,7 @@ from tortoise.models import Model
 
 from Tiktok_Analytics.database.models.scrapeoperation import ScrapeOperation
 
-class UserTarget(Model):
+class UserTargetModel(Model):
     id = fields.UUIDField(pk=True)
-    scrap_operation_id :fields.ForeignKeyRelation[ScrapeOperation]= fields.ForeignKeyField('models.ScrapeOperation', related_name='user_targets', on_delete=fields.CASCADE)
+    scrap_operation :fields.ForeignKeyRelation[ScrapeOperation]= fields.ForeignKeyField('models.ScrapeOperation', related_name='user_targets', on_delete=fields.CASCADE)
     username = fields.CharField(max_length=255)
