@@ -1,4 +1,3 @@
-import selectors
 from typing import List,Optional,Union
 import json
 from playwright.sync_api import Playwright, sync_playwright
@@ -34,11 +33,15 @@ class Search:
         global browser
         browser = playwright.chromium.launch(headless=False)
         global context
-        context = browser.new_context()
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4929.0 Safari/537.36"
+        context = browser.new_context(user_agent = user_agent)
         context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
         context.add_cookies(Search.cookies)
         global page
         page = context.new_page()
+        page.set_extra_http_headers({
+            "referer": "https://www.google.com/",
+        })
         page.goto("https://www.tiktok.com/")
 
 

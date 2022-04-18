@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends,Query,Request
-from typing import List, Optional, Union
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, Depends,Request
+from typing import List, Union
 from pydantic import BaseModel
 from Tiktok_Analytics.database.models.scrapeoperation import    ScrapeOperation
 from Tiktok_Analytics.services.utils import logger
 from ...models.user_target import UserTarget
 from ...models.video_target import VideoTarget
-from ...services.scrape import Scrape
+from ...core.scrape import Scrape
 from ...database.database import add_new_users, add_new_videos
 from ...database.models.user import UserDB 
 from ..users import  current_active_user

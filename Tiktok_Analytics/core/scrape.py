@@ -1,5 +1,4 @@
-import selectors
-from typing import Optional,Union
+from typing import Optional
 from ..models.user_target import UserTarget
 from ..models.video_target import VideoTarget
 from ..database.models.user_target import UserTargetModel
@@ -69,6 +68,9 @@ class Scrape :
                                 diggCount=user_info["stats"]["diggCount"],
                                 )
         user_target_rel = UserTargetModel(username=user_data.username,scrap_operation_id=self.scrape_operation.id)
+
+        # img_filename = ""
+        # Scrape.store_video_img(user_data.img,img_filename)
         await user_target_rel.save()
         return user_data
 
@@ -103,16 +105,10 @@ class Scrape :
         video_tags = await Scrape.get_video_tags(video_desc)
         #video_bytes = await Scrape.api.video(video["id"]).bytes()
          
-        video_filename = "Tiktok_Analytics\static\\videos\\"+"123"+"\\"+video["id"] + ".mp4"
-        image_filename  = "Tiktok_Analytics\static\\images\\"+"123"+"\\"+video["id"] + ".jpg"
-        try :
-            urllib.request.urlretrieve(video_link, video_filename)
-        except :
-            print("you are trying to download existing video")
-        try :
-            urllib.request.urlretrieve(img_link, image_filename)
-        except :
-            print("you are trying to download existing image")
+        # video_filename = "Tiktok_Analytics\static\\videos\\"+"123"+"\\"+video["id"] + ".mp4"
+        # image_filename  = "Tiktok_Analytics\static\\images\\"+"123"+"\\"+video["id"] + ".jpg"
+        # Scrape.store_video_img(video_link,video_filename)
+        # Scrape.store_video_img(img_link,image_filename)
 
         # int(commentCount)//20
         for i in range(10):
@@ -171,3 +167,10 @@ class Scrape :
         tags = [await tag.text_content() for tag in all_tags]
         tags = [tag for tag in tags if tag.startswith("@")]
         return tags
+
+    def store_video_img(link:str,filename:str) -> None:
+        try :
+            urllib.request.urlretrieve(link, filename)
+        except :
+            print("you are trying to download existing item")
+        
