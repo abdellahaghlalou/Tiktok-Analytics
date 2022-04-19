@@ -1,9 +1,13 @@
 from typing import List,Optional,Union
 import json
-from playwright.sync_api import Playwright, sync_playwright
+import urllib.request
+from PIL import Image
+import imgcompare
+from playwright.async_api import Playwright, async_playwright
 from ..models.user_target import UserTarget
 from ..models.video_target import VideoTarget
 import random
+from ..services.captcha import Captcha
 
 
 class Search:
@@ -17,66 +21,70 @@ class Search:
         self.search_result = search_result
 
     
-    def search(self) -> None:
+    async def search(self) -> None:
         if self.option == 1:
-            self.search_result =  self.search_by_user(self.search_word)
+            self.search_result =  await self.search_by_user(self.search_word)
         if self.option == 2:
-            self.search_result =  self.search_by_video(self.search_word)
+            self.search_result =  await self.search_by_video(self.search_word)
         if self.option == 3:
-            self.search_result =  self.search_by_hashtag(self.search_word)
+            self.search_result =   self.search_by_hashtag(self.search_word)
         if self.option == 4:
-            self.search_result =  self.search_by_sound(self.search_word)
+            self.search_result =   self.search_by_sound(self.search_word)
 
-    def start_playwright():
+    async def start_playwright():
         global playwright
-        playwright = sync_playwright().start()
+        playwright = await  async_playwright().start()
         global browser
-        browser = playwright.chromium.launch(headless=False)
+        browser = await playwright.chromium.launch(headless=False)
         global context
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4929.0 Safari/537.36"
-        context = browser.new_context(user_agent = user_agent)
-        context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
-        context.add_cookies(Search.cookies)
+        context = await browser.new_context(user_agent = user_agent)
+        await context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
+        await context.add_cookies(Search.cookies)
         global page
-        page = context.new_page()
-        page.set_extra_http_headers({
+        page = await context.new_page()
+        page.on('response', Search._responseHandler) 
+        await page.set_extra_http_headers({
             "referer": "https://www.google.com/",
         })
-        page.goto("https://www.tiktok.com/")
+        await page.goto("https://www.tiktok.com/")
 
 
-    def search_bar(search_word : str):
-        page.query_selector("input[type='search']").type(search_word)
-        page.wait_for_timeout((random.random() * 2000 + 3000))
-        page.press('button.tiktok-3n0ac4-ButtonSearch.ev30f216', 'Enter')
+    async def search_bar(search_word : str):
+        search_bar = await page.query_selector("input[type='search']")
+        await search_bar.type(search_word)
+        await page.wait_for_timeout((random.random() * 2000 + 3000))
+        await page.press('button.tiktok-3n0ac4-ButtonSearch.ev30f216', 'Enter')
 
-    def load_more(n : int):
+    async def load_more(n : int):
         for i in range(n):
-            page.wait_for_timeout((random.random() * 1000 + 1000))
-            page.query_selector(Search.selectors["see_more"]).click()
+            await page.wait_for_timeout((random.random() * 1000 + 1000))
+            see_more_butt = await page.query_selector(Search.selectors["see_more"])
+            await see_more_butt.click()
 
-    def search_by_user(self,search_word : str) -> List[UserTarget]:
+    async def search_by_user(self,search_word : str) -> List[UserTarget]:
 
-        Search.start_playwright()
-        page.wait_for_timeout((random.random() * 2000 + 3000))
+        await Search.start_playwright()
+        await page.wait_for_timeout((random.random() * 2000 + 3000))
         
-        Search.search_bar(search_word)        
-        page.wait_for_timeout((random.random() * 1000 + 1000))
-        page.query_selector(Search.selectors["Account_button"]).click()
+        await Search.search_bar(search_word)        
+        await page.wait_for_timeout((random.random() * 1000 + 1000))
+        account_butt = await page.query_selector(Search.selectors["Account_button"])
+        await account_butt.click()
 
-        Search.load_more(5)
-        page.wait_for_timeout((random.random() * 1000 + 1000))
-        users_containers = page.query_selector_all(Search.selectors["user_container"])
-        all_usernames = list(map(Search.get_user_name, users_containers))
-        all_imgs = list(map(Search.get_img, users_containers))
-        all_descs = list(map(Search.get_user_desc, users_containers))
-        all_nicknames_followers = list(map(Search.get_nicknames_followers, users_containers))
+        await Search.load_more(1)
+        await page.wait_for_timeout((random.random() * 1000 + 1000))
+        users_containers = await page.query_selector_all(Search.selectors["user_container"])
+        all_usernames = [await Search.get_user_name(elt) for elt in users_containers]
+        all_imgs = [await Search.get_img(elt) for elt in users_containers]
+        all_descs = [await Search.get_user_desc(elt) for elt in users_containers]
+        all_nicknames_followers = [await Search.get_nicknames_followers(elt) for elt in users_containers]
         #page.pause()
-        browser.close()
-        playwright.stop()
+        await browser.close()
+        await playwright.stop()
         return [UserTarget(username=all_usernames[i],nickname_followers=all_nicknames_followers[i],img=all_imgs[i],signature=all_descs[i]) for i in range(len(all_usernames))]
 
-    def search_by_video(self,search_word : str) -> List[VideoTarget]:
+    async def search_by_video(self,search_word : str) -> List[VideoTarget]:
         
         Search.start_playwright()
         page.wait_for_timeout((random.random() * 2000 + 10000))
@@ -88,12 +96,12 @@ class Search:
 
         page.wait_for_timeout((random.random() * 1000 + 1000))
         videos_containers = page.query_selector_all(Search.selectors["video_container"])
-        all_usernames = list(map(Search.get_video_name, videos_containers))
-        all_imgs = list(map(Search.get_img, videos_containers))
-        all_descs = list(map(Search.get_video_desc, videos_containers))
-        all_tags_hashtags = list(map(Search.get_tags_hashtags, videos_containers))
-        all_VideoWatchCount = list(map(Search.get_VideoWatchCount, videos_containers))
-        all_VideoIds = list(map(Search.get_videoIds, videos_containers))
+        all_usernames = [Search.get_video_name(elt) for elt in videos_containers]
+        all_imgs = [Search.get_img(elt) for elt in videos_containers]
+        all_descs = [Search.get_video_desc(elt) for elt in  videos_containers]
+        all_tags_hashtags = [Search.get_tags_hashtags(elt) for elt in videos_containers]
+        all_VideoWatchCount = [Search.get_VideoWatchCount(elt) for elt in videos_containers]
+        all_VideoIds = [Search.get_videoIds(elt) for elt in  videos_containers]
 
         browser.close()
         playwright.stop()
@@ -105,48 +113,146 @@ class Search:
     def search_by_sound(self,search_word : str) -> List[VideoTarget]:
         pass
     
-    def get_user_name(elt):
-        return elt.query_selector(Search.selectors["username"]).text_content()
+    async def get_user_name(elt):
+        username = await elt.query_selector(Search.selectors["username"])
+        return await username.text_content()
 
-    def get_video_name(elt):
-        return elt.query_selector(Search.selectors["username_video"]).text_content()
+    async def get_video_name(elt):
+        username_video = await elt.query_selector(Search.selectors["username_video"])
+        return await username_video.text_content()
 
-    def get_img(elt):
+    async def get_img(elt):
 
         try : 
-            img =  elt.query_selector("img").get_attribute("src")
+            img =  await elt.query_selector("img")
+            img = await img.get_attribute("src")
         except :
             img = ""
         return img 
 
-    def get_nicknames_followers(elt):
-       return  elt.query_selector_all("a")[1].text_content()
+    async def get_nicknames_followers(elt):
+       text = await  elt.query_selector_all("a")
+       return await text[1].text_content()
 
-    def get_user_desc(elt):  
+    async def get_user_desc(elt):  
         try :
-            return elt.query_selector("//a[2]/p[2]").text_content()
+            desc = await elt.query_selector("//a[2]/p[2]")
+            return await desc.text_content()
         except:
             return ""
 
-    def get_VideoWatchCount(elt):
-        return elt.query_selector("div[data-e2e='search-card-like-container']").text_content()
+    async def get_VideoWatchCount(elt):
+        elt = await elt.query_selector("div[data-e2e='search-card-like-container']")
+        return await elt.text_content()
 
-    def get_tags_hashtags(elt):
+    async def get_tags_hashtags(elt):
         try :
-            list_a_tags = elt.query_selector("div[data-e2e='search-card-video-caption']").query_selector_all("a")
-            list_tags_hashtags = [a.text_content() for a in list_a_tags]
+            list_a_tags = await  elt.query_selector("div[data-e2e='search-card-video-caption']")
+            list_a_tags = await list_a_tags.query_selector_all("a")
+            list_tags_hashtags = [await a.text_content() for a in list_a_tags]
             return list_tags_hashtags
         except :
             return []
 
-    def get_video_desc(elt):  
+    async def get_video_desc(elt):  
         try :
-            return elt.query_selector("//div[@data-e2e='search-card-video-caption']").query_selector("span").text_content()
+            desc = await elt.query_selector("//div[@data-e2e='search-card-video-caption']")
+            desc = await desc.query_selector("span")
+            return desc.text_content()
         except :
             return ""
 
-    def get_videoIds(elt):
-        return elt.query_selector("//div[@data-e2e='search_video-item']//a").get_attribute("href").split("/")[-1]
+    async def get_videoIds(elt):
+        elt = await elt.query_selector("//div[@data-e2e='search_video-item']//a")
+        return await elt.get_attribute("href").split("/")[-1]
 
     def trasform_nbr(nbr:str) -> int:
         return int(nbr.replace("K","000").replace("M","000000").replace("B","000000000").replace(".",""))
+
+    async def _responseHandler(response):
+
+        maxContentLength = -1
+
+        responseUrl =  response.url
+        #print(responseUrl)
+        if not Captcha.isCaptchaUrl(responseUrl):
+            return
+        await page.pause()
+        contentLength = int(response.headers['content-length'])
+        if contentLength > maxContentLength:
+            maxContentLength = contentLength
+            urllib.request.urlretrieve(responseUrl, "start.PNG")
+            await Captcha.resize_img("start.PNG")
+        
+        await Search.solveCaptcha()
+    
+    async def solveCaptcha():
+
+        Captcha.options = Captcha.get_defauls()
+        await page.evaluate(Captcha.appendOverlayAndHidePuzzlePiece,
+                            [Captcha.get_selectors()["puzzlePiece"],
+                            Captcha.get_selectors()["puzzlePieceOverlay"],
+                            Captcha.get_selectors()["puzzleImageWrapper"]])
+
+        sliderElement =  await page.query_selector(Captcha.get_selectors()["sliderElement"])
+        sliderHandle =  await page.query_selector(Captcha.get_selectors()["sliderHandle"])
+        slider =  await sliderElement.bounding_box()
+        handle =  await sliderHandle.bounding_box()
+
+        currentPosition = Captcha.options["startPosition"]
+
+        target = {
+        "position": 0,
+        "difference": 100,
+        }
+        await page.wait_for_timeout(3000)
+
+        await page.mouse.move(
+        handle["x"] + handle["width"] / 2,
+        handle["y"] + handle["height"] / 2
+        )
+        await page.mouse.down()
+
+        while   currentPosition < slider["width"] - handle["width"] / 2 :
+            await page.mouse.move(
+            handle["x"] + currentPosition,
+            handle["y"] + handle["height"] / 2)
+        
+
+            await page.evaluate(
+            Captcha._syncOverlayPositionWithPuzzlePiece,
+            [Captcha.get_selectors()["puzzlePiece"],
+            Captcha.get_selectors()["puzzlePieceOverlay"]])
+        
+
+            sliderContainer =  await page.query_selector(
+            Captcha.get_selectors()["puzzleImageWrapper"]
+        )
+
+            sliderImage = await page.screenshot(clip =  await sliderContainer.bounding_box(),path = "current.jpeg")
+            await Captcha.resize_img("current.jpeg")
+            difference = imgcompare.image_diff_percent("current.PNG", "start.jpeg")
+
+            if target["difference"] > difference :
+
+                target["difference"] = difference
+                target["position"] = currentPosition
+        
+
+            currentPosition += Captcha.options["positionIncrement"]
+        
+
+        await page.evaluate(
+        Captcha._removeOverlayAndShowPuzzlePiece,
+        [Captcha.get_selectors()["puzzlePieceOverlay"],
+        Captcha.get_selectors()["puzzlePiece"]]
+        )
+        #isVerifyPage =  self._isVerifyPage()
+
+        await page.mouse.move(
+        handle["x"] + target["position"],
+        handle["y"] + handle["height"] / 2
+        )
+        await page.mouse.up()
+
+        #return self._waitForCaptchaDismiss(isVerifyPage)

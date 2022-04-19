@@ -17,6 +17,8 @@ pytest-asyncio = "*"
 fastapi-users = {extras = ["tortoise-orm"], version = "*"}
 asyncpg = "*"
 tiktokapi = "*"
+pillow = "*"
+imgcompare = "*"
 
 [dev-packages]
 pytest = "*"
