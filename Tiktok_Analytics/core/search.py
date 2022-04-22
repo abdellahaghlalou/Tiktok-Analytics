@@ -39,8 +39,8 @@ class Search:
         global context
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4929.0 Safari/537.36"
         context = await browser.new_context(user_agent = user_agent)
-        await context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
-        await context.add_cookies(Search.cookies)
+        #await context.add_init_script("Tiktok_Analytics/services/js/navigator.plugins.js")
+        # await context.add_cookies(Search.cookies)
         global page
         page = await context.new_page()
         page.on('response', Search._responseHandler) 
@@ -70,7 +70,7 @@ class Search:
         await Search.search_bar(search_word)        
         await page.wait_for_timeout((random.random() * 1000 + 1000))
         account_butt = await page.query_selector(Search.selectors["Account_button"])
-        await account_butt.click()
+        await account_butt.click(timeout= 10000000)
 
         await Search.load_more(1)
         await page.wait_for_timeout((random.random() * 1000 + 1000))
@@ -79,7 +79,7 @@ class Search:
         all_imgs = [await Search.get_img(elt) for elt in users_containers]
         all_descs = [await Search.get_user_desc(elt) for elt in users_containers]
         all_nicknames_followers = [await Search.get_nicknames_followers(elt) for elt in users_containers]
-        #page.pause()
+        
         await browser.close()
         await playwright.stop()
         return [UserTarget(username=all_usernames[i],nickname_followers=all_nicknames_followers[i],img=all_imgs[i],signature=all_descs[i]) for i in range(len(all_usernames))]
@@ -174,21 +174,30 @@ class Search:
         maxContentLength = -1
 
         responseUrl =  response.url
-        #print(responseUrl)
         if not Captcha.isCaptchaUrl(responseUrl):
             return
-        await page.pause()
         contentLength = int(response.headers['content-length'])
         if contentLength > maxContentLength:
             maxContentLength = contentLength
-            urllib.request.urlretrieve(responseUrl, "start.PNG")
-            await Captcha.resize_img("start.PNG")
-        
+        await page.evaluate(Captcha.disabeleScroll)
         await Search.solveCaptcha()
     
     async def solveCaptcha():
 
         Captcha.options = Captcha.get_defauls()
+
+        elt =await page.query_selector(".captcha_verify_img_slide")
+        style = await elt.get_attribute("style")
+        await page.evaluate("document.querySelector('.captcha_verify_img_slide').style = 'hidden'")
+        sliderContainer =  await page.query_selector(
+          Captcha.get_selectors()["puzzleImageWrapper"]
+        )
+        await page.screenshot(clip =  await sliderContainer.bounding_box(),path = 'start.PNG')
+        await page.evaluate("(stl) => document.querySelector('.captcha_verify_img_slide').style = stl",style)
+        await Captcha.resize_img("start.PNG")
+
+
+
         await page.evaluate(Captcha.appendOverlayAndHidePuzzlePiece,
                             [Captcha.get_selectors()["puzzlePiece"],
                             Captcha.get_selectors()["puzzlePieceOverlay"],
@@ -228,10 +237,12 @@ class Search:
             sliderContainer =  await page.query_selector(
             Captcha.get_selectors()["puzzleImageWrapper"]
         )
+            
 
-            sliderImage = await page.screenshot(clip =  await sliderContainer.bounding_box(),path = "current.jpeg")
+            bbox = await sliderContainer.bounding_box()
+            sliderImage = await page.screenshot(clip =  bbox,path = "current.jpeg")
             await Captcha.resize_img("current.jpeg")
-            difference = imgcompare.image_diff_percent("current.PNG", "start.jpeg")
+            difference = imgcompare.image_diff_percent("current.PNG", "start.PNG")
 
             if target["difference"] > difference :
 
@@ -247,12 +258,10 @@ class Search:
         [Captcha.get_selectors()["puzzlePieceOverlay"],
         Captcha.get_selectors()["puzzlePiece"]]
         )
-        #isVerifyPage =  self._isVerifyPage()
+        
 
         await page.mouse.move(
         handle["x"] + target["position"],
         handle["y"] + handle["height"] / 2
         )
         await page.mouse.up()
-
-        #return self._waitForCaptchaDismiss(isVerifyPage)

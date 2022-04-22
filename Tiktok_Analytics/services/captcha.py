@@ -1,3 +1,4 @@
+from cgitb import enable
 import re
 from PIL import Image
 import imgcompare
@@ -88,7 +89,20 @@ class Captcha :
       setTimeout(reject.bind(this), 5000)
     })
   }"""
-   
+    disabeleScroll = """() => {
+    // Get the current page scroll position
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+  
+        // if any scroll is attempted, set this to the previous value
+        window.onscroll = function() {
+            window.scrollTo(scrollLeft, scrollTop);
+        };
+}"""
+    enableScroll = """() => {
+    window.onscroll = function() {};
+}"""
+    
     def __init__(self) -> None:
         pass
 
@@ -101,7 +115,6 @@ class Captcha :
 
     async def resize_img(img):
         readresult = Image.open(img)
-        readresult.convert('RGBA')
         resize_img = readresult.resize((276,172))
         resize_img.save(img.split('.')[0] +".PNG")
         
@@ -125,5 +138,3 @@ class Captcha :
             "puzzlePieceOverlay": '#captcha_overlay_box',
             }
     
-
-#document.querySelector(".captcha_verify_img_slide").style = "hidden"
