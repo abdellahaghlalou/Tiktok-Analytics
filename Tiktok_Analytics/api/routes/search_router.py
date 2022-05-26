@@ -11,7 +11,7 @@ from ..users import  current_active_user
 router = APIRouter()
 
 @router.get("/api/search",response_model=List[Union[VideoTarget,UserTarget]])
-async def search(option : int,search_word : str,user: UserDB = Depends(current_active_user)) :
+async def search(request : Request,option : int,search_word : str,user: UserDB = Depends(current_active_user)) :
     
     logger.info(f"Search request received by {user.email}")
     search = Search(option,search_word,None)

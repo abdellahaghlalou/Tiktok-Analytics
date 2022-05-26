@@ -14,5 +14,6 @@ class UserTarget(BaseModel):
     videoCount : Optional[int]  = None
     heartCount : Optional[int]  = None
     diggCount : Optional[int]   = None
+    hasBadge : Optional[bool]   = None
     img: Optional[str]  = None
     

@@ -11,7 +11,7 @@ from Tiktok_Analytics.services.utils import config, to_bool
 
 APP_VERSION = "0.0.1"
 # TODO change with repos names
-APP_NAME = "ASG"
+APP_NAME = "Tiktok_Analytics"
 API_PREFIX = ""
 
 #**************** Server Configuration ****************#

@@ -9,11 +9,16 @@ from typing import Coroutine
 from fastapi import FastAPI
 from Tiktok_Analytics.services.utils import logger
 from motor.motor_asyncio import AsyncIOMotorClient
+from playwright.async_api import Playwright, async_playwright
 
 
 async def _startup_model(app: FastAPI) -> Coroutine:
     """code to execute when the server startup
     """
+   
+    # playwright = await  async_playwright().start()  
+    # browser = await playwright.chromium.launch(headless=False)
+    # app.context = await browser.new_context()
     app.mongodb_client = AsyncIOMotorClient("mongodb://localhost:27017")
     app.mongodb = app.mongodb_client["tiktok"]
     logger.info("Server Startup")

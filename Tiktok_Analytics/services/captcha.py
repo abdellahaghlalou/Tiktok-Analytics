@@ -2,7 +2,7 @@ from cgitb import enable
 import re
 from PIL import Image
 import imgcompare
-
+ # backgroundColor: 'magenta',
 class Captcha :
     options : any
     startImage = "start.jpeg"
@@ -46,7 +46,8 @@ class Captcha :
       left: puzzlePieceEl.style.left,
       width: '0.617536em',
       height: '0.617536em',
-      backgroundColor: 'magenta',
+      opacity : '0.5',
+      backgroundColor: 'black',
     })
 
     puzzlePieceEl.style.display = 'none' 

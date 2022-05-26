@@ -23,12 +23,12 @@ async def scrape_(request : Request,item:Item,user: UserDB = Depends(current_act
     scrape_operation = ScrapeOperation(user_id = user.id)
     await scrape_operation.save()
     scrape = Scrape(scrape_operation=scrape_operation)
-    results = await scrape.scrape(option=item.option,targets=item.targets)
+    results = await scrape.scrape(option=item.option,targets=item.targets,request=request)
     
-    if item.option == 1:
-        await add_new_users(request,results)
-    if item.option == 2:
-        await add_new_videos(request,results)
+    # if item.option == 1:
+    #     await add_new_users(request,results)
+    # if item.option == 2:
+    #     await add_new_videos(request,results)
 
     return results
 

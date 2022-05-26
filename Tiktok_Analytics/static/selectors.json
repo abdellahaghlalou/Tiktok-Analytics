@@ -8,14 +8,60 @@
     "username":"//p[@data-e2e='search-user-unique-id']",
     "username_video":"//p[@data-e2e='search-card-user-unique-id']",
     "video_desc":"//div[@data-e2e='browse-video-desc']",
-    "videoLink":"//div[@data-e2e='browse-video']/video",
-    "videoImgLink":"//*[@id='app']/div[2]/div[3]/div[1]/div[2]/div[1]/img",
-    "comment_section":"//*[@id='app']/div[2]/div[3]/div[2]/div[3]",
-    "single_comment":"//*[@id='app']/div[2]/div[3]/div[2]/div[3]/div/div[1]/div[1]",
-    "commentCount":"//strong[@data-e2e='browse-comment-count']",
-    "likeCount":"//strong[@data-e2e='browse-like-count']",
+    "videoLink":"//*[@id='app']/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div/div/video",
+    "videoImgLink":"//*[@id='app']/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div/img",
+    "comment_section":"//*[@id='app']/div[2]/div[2]/div[1]/div[2]/div[1]/div[3]/div[2]",
+    "single_comment":"//*[@id='app']/div[2]/div[2]/div[1]/div[2]/div[1]/div[3]/div[2]/div",
+    "commentCount":"//strong[@data-e2e='comment-count']",
+    "likeCount":"//strong[@data-e2e='like-count']",
+    "shareCount" :"//strong[@data-e2e='share-count']",
     "sound":"//h4[@data-e2e='browse-music']/a",
+    "badge" : "//a[2]/p[1]/*",
     "nickname":"",
     "user_description":"",
-    "followers":""
+    "followers":"",
+    "video_time":"//div[1]/div/div/a/div/div[2]/div",
+    "username_video_image" :"//div[2]/div/div[2]/a/div/span/img",
+    "comment_button":"//*[@id='app']/div[2]/div[2]/div[1]/div[2]/div[1]/div[1]/div[3]/button[2]",
+    "user_page": {
+        "user_profile_image": "//div[@data-e2e='user-avatar']/span/img",
+        "user_nickname": "//h1[@data-e2e='user-subtitle']",
+        "following" :"//strong[@data-e2e='following-count']",
+        "followers" :"//strong[@data-e2e='followers-count']",
+        "videos" :"//div[@data-e2e='user-post-item-list']",
+        "video" : "//div[@data-e2e='user-post-item']",
+        "likes" :"//strong[@data-e2e='likes-count']",
+        "signature" :"//h2[@data-e2e='user-bio']",
+        "follow_button" :"",
+        "following_button" :"",
+        "followers_button" :""
+    },
+    "login_steps":{
+        "link":"https://www.tiktok.com/",
+        "connexion_button" : [
+            "//button[@data-e2e='top-login-button']",
+            "//button[@data-e2e='nav-login-button']"
+        ],
+        "login_to_register" : "//*[@id='root']/div/div[4]/div/div/a",
+        "options" : {
+            "normal":"//*[@id='root']/div/div[1]/div/div[1]/div[2]/div[2]",
+            "facebook" : ""
+        },
+        "email_option":"//*[@id='root']/div/div[1]/form/div[1]/a",
+        "number_option":"",
+        "email_input":"//input[@name='email']",
+        "password_input":"//input[@name = 'password']",
+        "login_button":"//*[contains(@class,'login-button')]"
+    },
+    "search":{
+        "search_bar":"",
+        "search_button":"",
+        "search_result":"",
+        "load_more":"",
+        "user_container":"",
+        "Accounts_page" : {},
+        "Videos_page" : {}
+    },
+    "video_page":{},
+    "home_page":{}
 }

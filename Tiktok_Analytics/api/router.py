@@ -6,17 +6,19 @@ Author:
 Copyright (c) 2020 Henceforth
 '''
 from tortoise.contrib.fastapi import register_tortoise
+
+from Tiktok_Analytics.api.routes import scrape_router_ws
 from ..configs.config import DATABASE_URL
 from ..database.models.user import UserDB
 from .users import auth_backend, current_active_user, fastapi_users
 from fastapi import APIRouter,Depends
-from .routes import configuration, authentication, search_router, scrape_router
+from .routes import configuration, authentication, search_router, scrape_router , scrape_router_ws
 
 api_router = APIRouter()
 api_router.include_router(router=configuration.router)
 api_router.include_router(router=search_router.router)
 api_router.include_router(router=scrape_router.router)
-
+api_router.include_router(router=scrape_router_ws.router)
 api_router.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
 )
