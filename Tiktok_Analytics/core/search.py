@@ -33,7 +33,7 @@ class Search:
         global playwright
         playwright = await  async_playwright().start()
         global browser
-        browser = await playwright.chromium.launch(headless=False)
+        browser = await playwright.chromium.launch(headless=True)
         global context
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4929.0 Safari/537.36"
         context = await browser.new_context(user_agent = user_agent)
@@ -55,28 +55,28 @@ class Search:
 
     async def search_bar(search_word : str):
         search_bar = await page.query_selector("input[type='search']")
-        await search_bar.type(search_word)
-        await page.wait_for_timeout((random.random() * 2000 + 3000))
+        await search_bar.type(search_word,timeout=3000)
+        # await page.wait_for_timeout((random.random() * 2000 + 3000))
         await page.press('button.tiktok-3n0ac4-ButtonSearch.ev30f216', 'Enter')
 
     async def load_more(n : int):
         for i in range(n):
-            await page.wait_for_timeout((random.random() * 1000 + 1000))
+            # await page.wait_for_timeout((random.random() * 1000 + 1000))
             see_more_butt = await page.wait_for_selector(Search.selectors["see_more"],timeout=10000000,)
             await see_more_butt.click()
 
     async def search_by_user(self,search_word : str) -> List[UserTarget]:
 
         await Search.start_playwright()
-        await page.wait_for_timeout((random.random() * 2000 + 3000))
+        # await page.wait_for_timeout((random.random() * 2000 + 3000))
         
         await Search.search_bar(search_word)        
-        await page.wait_for_timeout((random.random() * 1000 + 1000))
-        account_butt = await page.query_selector(Search.selectors["Account_button"])
+        # await page.wait_for_timeout((random.random() * 1000 + 1000))
+        account_butt = await page.wait_for_selector(Search.selectors["Account_button"],timeout=10000000)
         await account_butt.click(timeout= 10000000)
 
-        await Search.load_more(1)
-        await page.wait_for_timeout((random.random() * 1000 + 1000))
+        await Search.load_more(10)
+        # await page.wait_for_timeout((random.random() * 1000 + 1000))
         users_containers = await page.query_selector_all(Search.selectors["user_container"])
         all_usernames = [await Search.get_user_name(elt) for elt in users_containers]
         all_imgs = [await Search.get_img(elt) for elt in users_containers]
@@ -91,9 +91,9 @@ class Search:
     async def search_by_video(self,search_word : str) -> List[VideoTarget]:
         
         await Search.start_playwright()
-        await page.wait_for_timeout((random.random() * 2000 + 10000))
+        # await page.wait_for_timeout((random.random() * 2000 + 10000))
         await Search.search_bar(search_word)        
-        await page.wait_for_timeout((random.random() * 1000 + 1000))
+        # await page.wait_for_timeout((random.random() * 1000 + 1000))
         video_butt = await page.wait_for_selector(Search.selectors["Videos_button"])
         await video_butt.click(timeout= 10000000)
         
@@ -111,9 +111,11 @@ class Search:
         all_hashtags = [await Search.get_hashtags(elt) for elt in  videos_containers]
         all_times = [await Search.get_time(elt) for elt in  videos_containers]
         all_usernames_images = [await Search.get_username_image(elt) for elt in  videos_containers]
+        all_videoUrls = [await Search.get_videoUrl(elt) for elt in  videos_containers]
+        # print(all_videoUrls)
         await browser.close()
         await playwright.stop()
-        return [VideoTarget(username=all_usernames[i],username_img=all_usernames_images[i],time = all_times[i],tags =all_tags[i],hashtags=all_hashtags[i] ,imgLink=all_imgs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
+        return [VideoTarget(username=all_usernames[i],videoUrl=all_videoUrls[i],username_img=all_usernames_images[i],time = all_times[i],tags =all_tags[i],hashtags=all_hashtags[i] ,imgLink=all_imgs[i],tags_hashtags=all_tags_hashtags[i],videoCountWatch=all_VideoWatchCount[i],videoId=all_VideoIds[i]) for i in range(len(all_usernames))]
     
     def search_by_hashtag(self,search_word : str) -> List[VideoTarget]:
         pass
@@ -121,6 +123,17 @@ class Search:
     def search_by_sound(self,search_word : str) -> List[VideoTarget]:
         pass
     
+    async def get_videoUrl(elt):
+        try : 
+
+            elt = await elt.query_selector("//div[@data-e2e = 'search_video-item']")
+            await elt.hover()
+            url = await elt.query_selector("//div/div/a/div/div[1]/div/video")
+            return await url.get_attribute("src")
+        except Exception as e:
+            print(e)
+            return None
+
     async def hasBadge(elt):
         svg = await elt.query_selector(Search.selectors["badge"])
         if(await elt.query_selector(Search.selectors["badge"])):
@@ -215,7 +228,7 @@ class Search:
         try :
             desc = await elt.query_selector("//div[@data-e2e='search-card-video-caption']")
             desc = await desc.query_selector("span")
-            return desc.text_content()
+            return await desc.text_content()
         except :
             return " "
 

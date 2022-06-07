@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends,Request, WebSocket
+from fastapi import APIRouter, Depends, FastAPI,Request, WebSocket
 from typing import List, Union
 from pydantic import BaseModel
+from requests import request
 from Tiktok_Analytics.database.models.scrapeoperation import    ScrapeOperation
 from Tiktok_Analytics.services.utils import logger
 from ...models.user_target import UserTarget
@@ -10,29 +11,40 @@ from ...database.database import add_new_users, add_new_videos
 from ...database.models.user import UserDB 
 from ..users import  current_active_user
 
+
 router = APIRouter()
 
-class Item(BaseModel):
-    option : int
-    targets : List[dict]
+
 
 @router.websocket('/ws/scrape')
-async def scrape_(websocket : WebSocket,item:Item,user: UserDB = Depends(current_active_user)) :
-    logger.info(f"Scrape request received by {user.email}")  
-    
-    # scrape_operation = ScrapeOperation(user_id = user.id)
-    # await scrape_operation.save()
-    # scrape = Scrape(scrape_operation=scrape_operation)
+async def scrape_(websocket : WebSocket) :
+  
+    # logger.info(f"Scrape request received by {user.email}")  
     # results = await scrape.scrape(option=item.option,targets=item.targets,request=request)
     
-    # if item.option == 1:
-    #     await add_new_users(request,results)
-    # if item.option == 2:
-    #     await add_new_videos(request,results)
     await websocket.accept()
+
+   
     while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Message text was: {data}")
+        data = await websocket.receive_json()
+        # print("data received : ",data.userId.id)
+        scrape_operation = ScrapeOperation(user_id = data["userId"]["id"])
+        # await websocket.send_json( {"message":"Scrape request received by {data.userId.id}"})
+        await scrape_operation.save()
+        option = data["selected_result"]["option"] 
+
+        if option == '1':
+            scrape = Scrape(scrape_operation=scrape_operation)
+            async for result in scrape.scrape_videos(videos=data["selected_result"]["targets"],request=websocket):
+                await websocket.send_json(result)
+        
+        elif option == '2':
+            scrape = Scrape(scrape_operation=scrape_operation)
+            async for result in scrape.scrape_users(users=data["selected_result"]["targets"],request=websocket):
+                await websocket.send_json(result)
+
+
+        # await websocket.send_text(f"Message text was: {data}")
 
     
 

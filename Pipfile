@@ -19,6 +19,7 @@ asyncpg = "*"
 tiktokapi = "*"
 pillow = "*"
 imgcompare = "*"
+fastapi-contrib = "*"
 
 [dev-packages]
 pytest = "*"

@@ -9,6 +9,7 @@ class VideoTarget(BaseModel):
     desc : Optional[str] = None
     imgLink : Optional[str] = None
     videoLink : Optional[str] = None
+    videoUrl : Optional[str] = None
     tags :  Optional[List[str]] = None
     hashtags : Optional[List[str]] = None
     tags_hashtags : str = None

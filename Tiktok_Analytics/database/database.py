@@ -24,7 +24,7 @@ async def add_new_users(request,results):
     for result in results:
 
         document = jsonable_encoder(result)
-        await request.app.mongodb["user_target"].insert_one(document)
+        await request.app.mongodb["users"].insert_one(document)
        
 
 async def add_new_videos(request,results):
@@ -32,4 +32,4 @@ async def add_new_videos(request,results):
     for result in results :
 
         document = jsonable_encoder(result)
-        await request.app.mongodb["video_target"].insert_one(document)
+        await request.app.mongodb["videos"].insert_one(document)

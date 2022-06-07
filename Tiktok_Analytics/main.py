@@ -7,6 +7,7 @@ Copyright (c) 2021 Henceforth
 '''
 from fastapi import FastAPI
 import uvicorn
+from Tiktok_Analytics.api.routes import scrape_router_ws
 
 from .configs.config import (
     API_PREFIX, APP_NAME, APP_VERSION, IS_DEBUG, HOST, PORT)
@@ -34,15 +35,14 @@ def get_app() -> FastAPI:
     # * Shutdown behavior
     fast_app.add_event_handler("shutdown", stop_app_handler(fast_app))
 
-    fast_app.add_middleware(
+    fast_app.add_middleware( 
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 
-    
-)
+    )
 
 
     return fast_app

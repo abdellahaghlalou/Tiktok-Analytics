@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Optional
 from unittest import result
 
@@ -44,30 +45,58 @@ class Scrape :
 
     async def scrape(self,option:str,targets : List[dict],request) -> List[any]:
         if option == 1:
-            return await self.scrape_users(targets,request)
+            yield await self.scrape_users(targets,request)
         if option == 2:
-            return await self.scrape_videos(targets,request)
+            yield await self.scrape_videos(targets,request)
 
     async def scrape_users(self,users:List[dict],request) -> List[UserTarget]:
         users_list = []
         if(Scrape.use_tiktok):
             await Scrape.start_playwright()
             for user in users:
-                users_list.append(await self.scrape_user_from_tiktok(user["username"],request))
+                yield {"state" : "start","username":user["username"]}
+
+                try :
+                    data = await self.scrape_user_from_tiktok(user["username"],request)
+                    yield {"state" : "end","username":user["username"]}
+                
+                except Exception as e:
+                    pprint(e)
+                    yield {"state" : "error","username":user["username"]}
+    
+                
             await browser.close()
             await playwright.stop()     
         else:
             for user in users:
-                users_list.append(await self.scrape_user(user["username"],request))
-        return users_list
+                yield {"state" : "start","username":user["username"]}
+                try :
+                    data = await self.scrape_user(user["username"],request)
+                    yield {"state" : "end","username":user["username"]}
+                
+                except Exception as e:
+                    pprint(e)
+                    yield {"state" : "error","username":user["username"]}
+                
+        # return users_list
 
     async def scrape_videos(self,videos:List[dict],request) -> List[VideoTarget]:
         await Scrape.start_playwright()
         videos_list = []
         for video in videos:
-            videos_list.append(await self.scrape_video(video,request))
+            yield {"state" : "start","id":video["id"]}
+            try : 
+                data = await  self.scrape_video(video,request)
+                # yield data
+                yield {"state" : "end","id":video["id"]}
+            except  Exception as e :
+
+                pprint(e) 
+                yield {"state" : "error","id":video["id"]}
+            # yield {"state" : "end"} 
+            # videos_list.append(await self.scrape_video(video,request))
         await browser.close()
-        return videos_list
+        # return videos_list
         
     async def scrape_user_from_tiktok(self,username:str,request) -> List[str]:
         await page.goto("https://www.tiktok.com/@"+username)
@@ -85,9 +114,11 @@ class Scrape :
         desc = await desc.text_content()
         nickname = await page.wait_for_selector(Scrape.selectors["user_page"]["user_nickname"])
         nickname = await nickname.text_content()
-        imageLink = await page.wait_for_selector(Scrape.selectors["user_page"]["user_profile_image"])
-        imageLink = await imageLink.get_attribute("src")
-
+        try :
+            imageLink = await page.wait_for_selector(Scrape.selectors["user_page"]["user_profile_image"])
+            imageLink = await imageLink.get_attribute("src")
+        except Exception as e:
+            imageLink = None
         user_data = UserTarget(username=username,
                                 nickname=nickname,
                                 signature=desc,
@@ -106,7 +137,7 @@ class Scrape :
         # img_filename = "Tiktok_Analytics\static\images"+"\"+user_data.username+".jpg"
         # Scrape.store_video_img(user_data.img,img_filename)
         await user_target_rel.save()
-        return user_data
+        return user_data.dict()
 
     async def scrape_user(self,username:str,request) -> UserTarget:
         user = Scrape.api.user(username)
@@ -129,23 +160,24 @@ class Scrape :
         # img_filename = "Tiktok_Analytics\static\images"+"\"+user_data.username+".jpg"
         # Scrape.store_video_img(user_data.img,img_filename)
         await user_target_rel.save()
-        return user_data
+        return user_data.dict()
 
     async def scrape_video(self,video : dict,request) -> VideoTarget:
        
         await page.wait_for_timeout((random.random() * 2000 + 3000))
 
         video_url = "https://www.tiktok.com/@" + video["username"] + "/video/" + video["id"]+"?is_copy_url=1&is_from_webapp=v1&q="+video["username"]+"&t="+str(int(time.time()))
+        # await page.pause()
         await page.goto(video_url)
         await page.wait_for_timeout((random.random() * 1000 + 3000))
 
-        button = await page.query_selector(Scrape.selectors["comment_button"])
+        # button = await page.query_selector(Scrape.selectors["comment_button"])
         
-        await button.click(timeout= 10000000)
-        await page.wait_for_timeout((random.random() * 1000 + 1000))
+        # await button.click(timeout= 10000000)
+        # await page.wait_for_timeout((random.random() * 1000 + 1000))
 
-        sound = await page.query_selector(Scrape.selectors["sound"])
-        sound= await sound.get_attribute("href")
+        # sound = await page.query_selector(Scrape.selectors["sound"])
+        # sound= await sound.get_attribute("href")
         commentCount = await page.query_selector(Scrape.selectors["commentCount"])
         commentCount = await commentCount.text_content()
         commentCount = Scrape.trasform_nbr(commentCount)
@@ -155,8 +187,15 @@ class Scrape :
         likeCounts = await page.query_selector(Scrape.selectors["likeCount"])
         likeCounts = await likeCounts.text_content()
         likeCounts = Scrape.trasform_nbr(likeCounts)
-        video_link = await page.query_selector(Scrape.selectors["videoLink"])
-        video_link = await video_link.get_attribute("src")
+
+        button = await page.query_selector(Scrape.selectors["comment_button"])
+        await button.click(timeout= 10000000)
+        await page.wait_for_timeout((random.random() * 1000 + 1000))
+
+        sound = await page.query_selector(Scrape.selectors["sound"])
+        sound= await sound.get_attribute("href")
+        # video_link = await page.query_selector(Scrape.selectors["videoLink"])
+        # video_link = await video_link.get_attribute("src")
         img_link = await page.query_selector(Scrape.selectors["videoImgLink"])
         img_link = await img_link.get_attribute("src")
         video_desc = await page.query_selector(Scrape.selectors["video_desc"])
@@ -193,7 +232,7 @@ class Scrape :
         # await browser.close()
         video_data = VideoTarget(username=video["username"],
                                 videoId=video["id"],
-                                videoLink=video_link,
+                                videoLink="https://www.tiktok.com/@" + video["username"] + "/video/" + video["id"],
                                 imgLink=img_link,
                                 soundId=sound,
                                 commentCount=commentCount,
@@ -206,7 +245,7 @@ class Scrape :
         await add_new_videos(results=[video_data],request = request)
         video_target_rel = VideoTargetModel(video_id=video_data.videoId,scrap_operation_id=self.scrape_operation.id)
         await video_target_rel.save()
-        return video_data
+        return video_data.dict()
     
     def trasform_nbr(nbr:str) -> int:
 
