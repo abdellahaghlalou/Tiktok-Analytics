@@ -97,7 +97,7 @@ class Search:
         video_butt = await page.wait_for_selector(Search.selectors["Videos_button"])
         await video_butt.click(timeout= 10000000)
         
-        await Search.load_more(1)
+        await Search.load_more(3)
 
         await page.wait_for_timeout((random.random() * 1000 + 1000))
         videos_containers =await  page.query_selector_all(Search.selectors["video_container"])

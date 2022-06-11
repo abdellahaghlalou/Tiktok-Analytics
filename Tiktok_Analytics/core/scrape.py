@@ -119,7 +119,9 @@ class Scrape :
             imageLink = await imageLink.get_attribute("src")
         except Exception as e:
             imageLink = None
-        user_data = UserTarget(username=username,
+        user_data = UserTarget(
+                                scrape_operation_id= self.scrape_operation.id,
+                                username=username,
                                 nickname=nickname,
                                 signature=desc,
                                 img=imageLink,
@@ -166,7 +168,7 @@ class Scrape :
        
         await page.wait_for_timeout((random.random() * 2000 + 3000))
 
-        video_url = "https://www.tiktok.com/@" + video["username"] + "/video/" + video["id"]+"?is_copy_url=1&is_from_webapp=v1&q="+video["username"]+"&t="+str(int(time.time()))
+        video_url = "https://www.tiktok.com/@" + video["username"] + "/video/" + video["id"]+"?is_copy_url=1&is_from_webapp=v1&q="+video["search_query"]+"&t="+str(int(time.time()))
         # await page.pause()
         await page.goto(video_url)
         await page.wait_for_timeout((random.random() * 1000 + 3000))
@@ -188,16 +190,28 @@ class Scrape :
         likeCounts = await likeCounts.text_content()
         likeCounts = Scrape.trasform_nbr(likeCounts)
 
-        button = await page.query_selector(Scrape.selectors["comment_button"])
-        await button.click(timeout= 10000000)
+        
+        try :
+            button = await page.query_selector(Scrape.selectors["comment_button"][0])
+            await button.click(timeout= 10000000)
+        
+        except : 
+            button = await page.query_selector(Scrape.selectors["comment_button"][1])
+            await button.click(timeout= 10000000)
+            
         await page.wait_for_timeout((random.random() * 1000 + 1000))
 
         sound = await page.query_selector(Scrape.selectors["sound"])
+        sound_text = await sound.text_content()
         sound= await sound.get_attribute("href")
+        
         # video_link = await page.query_selector(Scrape.selectors["videoLink"])
         # video_link = await video_link.get_attribute("src")
-        img_link = await page.query_selector(Scrape.selectors["videoImgLink"])
-        img_link = await img_link.get_attribute("src")
+        try : 
+            img_link = await page.query_selector(Scrape.selectors["videoImgLink"])
+            img_link = await img_link.get_attribute("src")
+        except Exception as e:
+            img_link = None
         video_desc = await page.query_selector(Scrape.selectors["video_desc"])
         video_description = await Scrape.get_video_desc(video_desc)
         video_hashtags = await Scrape.get_video_hashtags(video_desc)
@@ -210,13 +224,25 @@ class Scrape :
 
         # int(commentCount)//20
         for i in range(10):
+            
             # window.scroll(0,document.body.scrollHeight)
-            elt = await page.query_selector(Scrape.selectors["comment_section"])
-            await elt.evaluate("elt => elt.scroll(0,elt.scrollHeight)")
-            await page.wait_for_timeout((random.random() * 100 + 100))
+            try :
+                elt = await page.query_selector(Scrape.selectors["comment_section"])
+                
+                await elt.evaluate("elt => elt.scroll(0,elt.scrollHeight)")
+                await elt.evaluate("elt => elt.scroll(0,-1)")
+                await page.wait_for_timeout((random.random() * 100 + 100))
+            except :
+                break
         await page.wait_for_timeout((random.random() * 1000 + 1000))
-        comments = await page.query_selector_all(Scrape.selectors["single_comment"])
+        try :
 
+            comments = await page.query_selector_all("div.tiktok-16r0vzi-DivCommentItemContainer.e1ypimm70")
+            print(len(comments))
+        except :
+            comments = await page.query_selector_all(Scrape.selectors["single_comment"][1])
+            print(len(comments))
+        
         comments = [{"whocomments" :await co.query_selector("a"),
                     "text":await co.query_selector("p[data-e2e='comment-level-1']") } 
                     for co in comments]
@@ -230,13 +256,19 @@ class Scrape :
                     for co in comments]
                     
         # await browser.close()
-        video_data = VideoTarget(username=video["username"],
+        video_data = VideoTarget(
+                                scrape_operation_id= self.scrape_operation.id,
+                                username=video["username"],
                                 videoId=video["id"],
                                 videoLink="https://www.tiktok.com/@" + video["username"] + "/video/" + video["id"],
                                 imgLink=img_link,
                                 soundId=sound,
+                                soundText=sound_text,
                                 commentCount=commentCount,
                                 likeCount=likeCounts,
+                                shareCount=shareCount,
+                                videoCountWatch= Scrape.trasform_nbr(video["data"]["videoCountWatch"]),
+                                time=Scrape.trasform_time(video["data"]["time"]),
                                 comments=comments,
                                 desc = video_description,
                                 tags = video_tags,
@@ -247,6 +279,13 @@ class Scrape :
         await video_target_rel.save()
         return video_data.dict()
     
+    def trasform_time(time):
+        new_time = time.split("-")
+        if len(new_time) == 3 :
+            return time
+
+        return "2022-"+time
+
     def trasform_nbr(nbr:str) -> int:
 
         return int(nbr.replace("K","000").replace("M","000000").replace("B","000000000").replace(".",""))

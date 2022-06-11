@@ -22,3 +22,4 @@ class VideoTarget(BaseModel):
     username_img : Optional[str] = None
     videoId : str
     soundId : Optional[str] = None
+    soundText : Optional[str] = None
